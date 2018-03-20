@@ -3,10 +3,11 @@ package com.cen.dubboconsumer.controller;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.cen.dubboapi.entity.User;
 import com.cen.dubboapi.service.UserService;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+
+@Controller
 @RequestMapping("/user")
 public class UserController {
     @Reference
