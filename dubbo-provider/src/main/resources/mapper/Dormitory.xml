@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+     <mapper namespace="com.cen.dubboprovider.mapper.DormitoryMapper">
+          <select id="getDormitoryName" resultType="Dormitory">
+             select * from s_dormitory GROUP BY dormitory_name
+         </select>
+    <select id="getAllRoomByDormitoryName" parameterType="String" resultType="Dormitory">
+        SELECT * from s_dormitory where dormitory_name = #{dormitoryName}
+    </select>
+    <select id="getDormitoryInfor" parameterType="String" resultMap="com.cen.dubboprovider.mapper.UserMapper.UserinfoMap">
+        select d.account,d.user_name,d.birthday,d.email,d.ic_card,d.sex,d.tel,a.dept_name,b.room,b.sumbed,b.leftbed,b.dormitory_name,b.floor,c.position_name
+from s_dept a,s_dormitory b,s_position c,s_user d
+where a.id = d.dept
+and b.id = d.dormitory
+and c.id = d.position
+and b.dormitory_name = #{dormitoryName}
+<if test="'0'.toString != room.toString()">
+    and b.room = #{room}
+</if>
+    </select>
+     </mapper>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<meta charset="UTF-8">
+<title>宿舍查询</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/bootstrap/js/jquery-3.2.1.min.js"></script>
+<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+<script src="/bootstrap/js/bootstrap.min.js"></script>
+<link href="/bootstrap/css/bootstrap-table.css" rel="stylesheet"/>
+<script src="/bootstrap/js/bootstrap-table.min.js"></script>
+<script src="/bootstrap/js/bootstrap-table-zh-CN.js"></script>
+<!-- <style type="text/css">
+     table td{word-break: keep-all;white-space:nowrap;}
+     table th{word-break: keep-all;white-space:nowrap;}
+ </style>-->
+<script type="text/javascript">
+    $(function(){
+        //绑定宿舍号
+        $.post('/dormitory/getdormitoryname',{},function(data){
+            var optionstring='';
+            $.each(data,function(i,n){
+                optionstring += "<option value=\"" + n.dormitory_name + "\" >" + n.dormitory_name + "</option>";
+            });
+            $("#dormitoryName").html("<option value='0'>-请选择-</option> "+optionstring);
+        });
+        //绑定房间号
+        $("#dormitoryName").change(function(){
+            var value = $("#dormitoryName").val();
+            getallRoom(value);
+        });
+        //查询
+        $("#btnSearchRoom").click(function(){
+            var dormitoryName = $("#dormitoryName").val();
+            var room = $("#room").val();
+            //var heights = $(window).height() - 35;
+            //var currentPage = 1;
+            if(dormitoryName == 0){
+                alert('请选择信息');
+                $("#dormitoryInfo").bootstrapTable('destroy');
+                return false;
+            }
+            $("#dormitoryInfo").bootstrapTable('destroy');
+            $('#dormitoryInfo').bootstrapTable({
+                columns: [
+                    {field:'account',title:'工号'},
+                    {field:'user_name',title:'姓名'},
+                    {field:'tel',title:'电话'},
+                    {field:'email',title:'邮件'},
+                    {field:'dept.dept_name',title:'部门'},
+                    {field:'dormitory.dormitory_name',title:'宿舍楼'},
+                    {field:'dormitory.room',title:'房间'},
+                    {field:'position.position_name',title:'职位'},
+                ],
+                //height:heights,
+                pagination:true,
+                paginationLoop:true,
+                sortOrder:'asc',
+                smartDisplay:true,
+                showToggle:true,
+                showColumns: true,
+                showRefresh: true,
+                locale:'zh-CN',//中文支持
+                //页面需要展示的列，后端交互对象的属性
+                pagination: true,  //开启分页
+                sidePagination: 'server',
+                pageNumber: 1,//默认加载页
+                pageSize: 2,//每页数据
+                pageList: [5,10,15,20],//可选的每页数据
+                queryParamsType:'',//queryParamsType的默认值为 'limit' ,在默认情况下 传给服务端的参数为：offset,limit,sort
+                //设置为 ''  在这种情况下传给服务器的参数为：pageSize,pageNumber */
+                queryParams: function (params) {
+                    return {
+                        dormitoryName: dormitoryName,
+                        room:room,
+                        currentPage:params.pageNumber,
+                        pageSize:params.pageSize
+                    }
+                },//请求服务器数据时的参数
+                url: '/dormitory/getdormitoryinfor', //服务器数据的加载地址
+                responseHandler:function(res){
+                    //在ajax获取到数据，渲染表格之前，修改数据源
+                   //var sss = JSON.stringify(res);
+                    //alert(sss);
+                    var nres = [];
+                    nres.push({total:res.total,rows:res.list});
+                    return nres[0];
+                }
+            });
+        });
+    })
+    function getallRoom(dormitoryName){
+        if(dormitoryName == 0){
+            return false;
+        }
+        $.post('/dormitory/getallroombydormitoryname',{dormitoryName:dormitoryName},function(data){
+            var roomoption='';
+            $.each(data,function(i,n){
+                roomoption += "<option value=\"" + n.room + "\" >" + n.room + "</option>";
+            });
+            $("#room").html("<option value='0'>-请选择-</option> "+roomoption);
+        });
+    }
+</script>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <font color="red">*</font>宿舍楼:<select id="dormitoryName"></select>
+        <font color="red">*</font>房间号:<select id="room"></select>
+        <input type="button" id="btnSearchRoom" class="btn btn-default" value="查询">
+    </div>
+    <table id="dormitoryInfo"></table>
+</div>
+</body>
+
+</html>

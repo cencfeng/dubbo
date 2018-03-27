@@ -21,7 +21,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<dubbo-spring-boot>1.0.0</dubbo-spring-boot>
+		<!--<dubbo-spring-boot>1.0.0</dubbo-spring-boot>-->
 		<java.version>1.8</java.version>
 	</properties>
 
@@ -51,7 +51,7 @@
             <artifactId>dubboapi</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>dubbo</artifactId>
 			<version>2.6.0</version>
@@ -70,7 +70,7 @@
 		<dependency>
 			<groupId>org.mybatis.spring.boot</groupId>
 			<artifactId>mybatis-spring-boot-starter</artifactId>
-			<version>1.2.0</version>
+			<version>1.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.101tec</groupId>
@@ -81,7 +81,8 @@
 			<groupId>io.dubbo.springboot</groupId>
 			<artifactId>spring-boot-starter-dubbo</artifactId>
 			<version>${dubbo-spring-boot}</version>
-		</dependency>
+		</dependency>-->
+
 	</dependencies>
 
 	<build>
@@ -92,6 +93,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-
 </project>
