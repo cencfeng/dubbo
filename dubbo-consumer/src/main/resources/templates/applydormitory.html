@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<meta charset="UTF-8">
+<title>宿舍申请</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/bootstrap/js/jquery-3.2.1.min.js"></script>
+<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+<script src="/bootstrap/js/bootstrap.min.js"></script>
+<link href="/bootstrap/css/bootstrap-table.css" rel="stylesheet"/>
+<script src="/bootstrap/js/bootstrap-table.min.js"></script>
+<script src="/bootstrap/js/bootstrap-table-zh-CN.js"></script>
+<script src="/bootstrap/js/My97DatePicker/WdatePicker.js"></script>
+<script src="/bootstrap/js/jquery.form.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <form action="/dormitory/applydormitory" method="post" id="applyInfo">
+        <div class="row">
+            <div class="col-sm-3">
+                <font color="red">*</font>工号:<input type="text" id="txtAccount" name="txtAccount" placeholder="工号:">
+            </div>
+            <div class="col-sm-3">
+                <font color="red">*</font>姓名:<input type="text" id="txtName" name="txtName" placeholder="姓名">
+            </div>
+            <div class="col-sm-2">
+                <font color="red">*</font>宿舍楼:<select id="dormitoryName" name="dormitoryName"></select>
+            </div>
+            <div class="col-sm-2">
+                <font color="red">*</font>房间号:<select id="room" name = "room"></select>
+            </div>
+            <div class="col-sm-1">
+                <input type="button" id="btnApply" value="申请入住">
+            </div>
+            <div class="col-sm-1">
+                <input type="button" id="btnSearch" value="查询">
+            </div>
+        </div>
+    </form>
+    <table id="dormitoryInfo"></table>
+</div>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $.post('/dormitory/getdormitoryname', {}, function (data) {
+            var optionstring = '';
+            $.each(data, function (i, n) {
+                optionstring += "<option value=\"" + n.dormitory_name + "\" >" + n.dormitory_name + "</option>";
+            });
+            $("#dormitoryName").html("<option value='0'>-请选择-</option> " + optionstring);
+        });
+        //绑定剩余的房间号
+        $("#dormitoryName").change(function(){
+            var value = $("#dormitoryName").val();
+            getleftRoom(value);
+        });
+        $("#txtAccount").on('change',function () {
+            var account = $("#txtAccount").val();
+            //alert(account);
+            $.post('/user/getuserbyaccount',{account:account},function (data) {
+                //alert(data);
+                if(data =="f"){
+                    alert("用户不存在");
+                }else{
+                    if(data != "r"){
+                        $("#txtName").val(data);
+                    }
+                }
+            });
+        });
+        $("#btnApply").click(function () {
+            var account = $("#txtAccount").val();
+            var username =  $("#txtName").val();
+            var dormitoryName = $("#dormitoryName").val();
+            var room = $("#room").val();
+            if(account ==''||username==''||dormitoryName==''||room==''){
+                alert('请输入完整信息!');
+                return false;
+            }
+            $.post('/user/getuserbyaccount',{account:account},function (data) {
+                //alert(data);
+                if(data == "f"){
+                    alert("该账号还没有注册!");
+                    //location.href = '/topage/applyaccount';
+                    //window.location.replace('/topage/applyaccount')
+                    //location.href = Tab.addTab('账号申请','/topage/applyaccount');
+                    //top.location='/topage/applyaccount';
+                    return false;
+                }else if(data =="r"){
+                    alert("该用户已经分配宿舍");
+                    return false;
+                }else {
+                    var option = {
+                        url : '/dormitory/applydormitory',
+                        type : 'post',
+                        success : function(data) {
+                            //alert(data);
+                            if(data ==true){
+                                $("#applyInfo").resetForm();
+                                alert('申请成功!');
+                            }else{
+                                alert("申请异常");
+                            }
+                        }
+                    };
+                    //$("#applyInfo").attr("action", "/dormitory/applydormitory");
+                    $("#applyInfo").ajaxSubmit(option);
+                }
+            });
+        });
+        //宿舍成员查询
+        $("#btnSearch").click(function() {
+            var dormitoryName = $("#dormitoryName").val();
+            var room = $("#room").val();
+            if (dormitoryName == 0) {
+                alert('请选择信息');
+                $("#dormitoryInfo").bootstrapTable('destroy');
+                return false;
+            }
+            $("#dormitoryInfo").bootstrapTable('destroy');
+            $('#dormitoryInfo').bootstrapTable({
+                columns: [
+                    {field: 'ck', checkbox: true},
+                    {title:'序号',formatter:function (value,row,index) {
+                            return index+1;
+                        }},
+                    {field:'dormitory.dormitory_name',title:'宿舍楼'},
+                    {field:'dormitory.room',title:'房间'},
+                    {field:'user_name',title:'姓名'},
+                    {field:'stayintime', title:'入住时间', formatter: function (value, row, index) {
+                            if (value == null) {
+                                return "";
+                            }
+                            return value.substr(0,10);
+                            //return value.split(' ',1);
+                        }
+                    },
+                    {field:'dormitory.sumbed',title:'床位'},
+                    {field:'dormitory.leftbed',title:'剩余床位'},
+                    {field:'tel',title:'电话'},
+                    {field:'dept.dept_name',title:'部门'},
+                    {field:'position.position_name',title:'职位'},
+                    {title:'操作',events: 'actionEvents',formatter:'buttonactionFormatter'}
+                ],
+                //height:heights,
+                pagination:true,
+                paginationLoop:true,
+                sortOrder:'asc',
+                smartDisplay:true,
+                showToggle:true,
+                showColumns: true,
+                showRefresh: true,
+                locale:'zh-CN',//中文支持
+                //页面需要展示的列，后端交互对象的属性
+                pagination: true,  //开启分页
+                sidePagination: 'server',
+                pageNumber: 1,//默认加载页
+                pageSize: 10,//每页数据
+                pageList: [5,10,15,20],//可选的每页数据
+                queryParamsType:'',//queryParamsType的默认值为 'limit' ,在默认情况下 传给服务端的参数为：offset,limit,sort
+                //设置为 ''  在这种情况下传给服务器的参数为：pageSize,pageNumber */
+                queryParams: function (params) {
+                    return {
+                        dormitoryName: dormitoryName,
+                        room:room,
+                        currentPage:params.pageNumber,
+                        pageSize:params.pageSize
+                    }
+                },//请求服务器数据时的参数
+                url: '/dormitory/getdormitorymember', //服务器数据的加载地址
+                responseHandler:function(res){
+                    //在ajax获取到数据，渲染表格之前，修改数据源
+                    var nres = [];
+                    nres.push({total:res.total,rows:res.list});
+                    return nres[0];
+                }
+            });
+        });
+    })
+    function buttonactionFormatter(value, row, index) {
+        return [
+            "<a class='update' href='javascript:;' onclick='updateAction("+index+")' data-toggler='tooltip' title='Edit'><i class='glyphicon glyphicon-edit'></i></a>",
+            "<a class='delete' href='javascript:;' onclick='deleteAction("+index+")' data-toggler='tooltip' title='Remove'><i class='glyphicon glyphicon-remove'></i></a>"
+        ].join('');
+    }
+    function updateAction(index) {
+        var rows = $('#dormitoryInfo').bootstrapTable('getSelections');
+        var sss=JSON.stringify(rows);
+        alert(sss);
+    }
+    function deleteAction() {}
+
+    function getleftRoom(dormitoryName){
+        if(dormitoryName == 0){
+            return false;
+        }
+        $.post('/dormitory/getleftroombydormitoryname',{dormitoryName:dormitoryName},function(data){
+            var roomoption='';
+            $.each(data,function(i,n){
+                roomoption += "<option value=\"" + n.room + "\" >" + n.room + "</option>";
+            });
+            $("#room").html("<option value='0'>-请选择-</option> "+roomoption);
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<meta charset="UTF-8">
+<title>账号申请</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/bootstrap/js/jquery-3.2.1.min.js"></script>
+<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+<script src="/bootstrap/js/bootstrap.min.js"></script>
+<link href="/bootstrap/css/bootstrap-table.css" rel="stylesheet"/>
+<script src="/bootstrap/js/bootstrap-table.min.js"></script>
+<script src="/bootstrap/js/bootstrap-table-zh-CN.js"></script>
+<script src="/bootstrap/js/My97DatePicker/WdatePicker.js"></script>
+<script src="/bootstrap/js/jquery.form.min.js"></script>
+
+</head>
+<body>
+<div class="container">
+    <form action="/user/applyaccount" method="post" id="applyInfo">
+        <div class="row">
+            <div class="col-sm-3">
+                <font color="red">*</font>工号:<input type="text" id="txtAccount" name="account" placeholder="工号:">
+            </div>
+            <div class="col-sm-3">
+                <font color="red">*</font>姓名:<input type="text" id="txtName" name="user_name" placeholder="姓名">
+            </div>
+            <div class="col-sm-3">
+                邮件:<input type="text" id="txtEmail" name="email" placeholder="邮件">
+            </div>
+            <div class="col-sm-3">
+                电话:<input type="text" id="txtTel" name="tel" placeholder="电话">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3">
+                部门:<select id="dept" name="ddldept"></select>
+            </div>
+            <div class="col-sm-3">
+                职位:<select id="position" name="ddlposition"></select>
+            </div>
+            <div class="col-sm-3">
+                <font color="red">*</font>性别:<select id="sex" name="sex">
+                <option value="1">男</option>
+                <option value="0">女</option>
+            </select>
+            </div>
+            <div class="col-sm-3">
+                身份证号码:<input type="text" id="txtCard" name="ic_card" placeholder="身份证">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-3">
+                是否住宿:<select id="dormitory" name="location">
+                <option value="1">是</option>
+                <option value="0">否</option>
+            </select>
+            </div>
+            <div class="col-sm-3">
+                备注:<input type="text" id="txtDescript" name="description" placeholder="备注">
+            </div>
+            <div class="col-sm-3">
+                <input type="button" id="btnSure" value="确定">
+            </div>
+            <div class="col-sm-3">
+                <input type="reset" id="btnReset" value="重置">
+            </div>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $.post('/dept/getdept',{},function (data) {
+            var optionstring = '';
+            $.each(data, function (i, n) {
+                optionstring += "<option value=\"" + n.id + "\" >" + n.dept_name + "</option>";
+            });
+            $("#dept").html("<option value='0'>-请选择-</option> " + optionstring);
+        });
+        $.post('/position/getposition',{},function (data) {
+            var optionstring = '';
+            $.each(data, function (i, n) {
+                optionstring += "<option value=\"" + n.id + "\" >" + n.position_name + "</option>";
+            });
+            $("#position").html("<option value='0'>-请选择-</option> " + optionstring);
+        });
+        $("#btnSure").click(function () {
+           var account = $("#txtAccount").val();
+           var username = $("#txtName").val();
+           var sex = $("#sex").val();
+           if(account==''||username==''){
+               alert("工号姓名不能为空!");
+               return false;
+           }
+           $.post('/user/getuserbyaccount',{account:account},function (data) {
+               if(data != "f"){
+                   alert(account+'用户已存在');
+                   return false;
+               }else{
+                   var option ={
+                       url: '/user/applyaccount',
+                       type: 'post',
+                       success:function (data) {
+                           if(data ==true){
+                               alert('账号申请成功');
+                               $("#applyInfo").resetForm();
+                           }
+                       }
+                   }
+                   //$("#applyInfo").attr("action","/user/applyaccount");
+                   //$("#applyInfo").submit();
+                   $("#applyInfo").ajaxSubmit(option);
+               }
+           });
+        });
+        $("#txtAccount").on('change',function () {
+            var account = $("#txtAccount").val();
+            //alert(account);
+            $.post('/user/getuserbyaccount',{account:account},function (data) {
+                //alert(data);
+                if(data != "f"){
+                    if(data != "r"){
+                        $("#txtName").val(data);
+                    }
+                    alert(account+'用户已存在');
+                    //return false;
+                }
+            });
+        });
+    })
+</script>
+</body>
+</html>

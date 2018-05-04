@@ -9,5 +9,8 @@ import java.util.List;
 public interface DormitoryService {
     List<Dormitory> getDormitoryName();
     List<Dormitory> getAllRoomByDormitoryName(String dormitoryName);
-    PageInfo<User> getDormitoryInfor(String dormitoryName, String room,Integer currentPage,Integer pageSize);
+    PageInfo<Dormitory> getDormitoryInfor(String dormitoryName, String room,String searchDate,Integer currentPage,Integer pageSize);
+    PageInfo<User> getDormitoryMember(String dormitoryName, String room,Integer currentPage,Integer pageSize);
+    List<Dormitory> getLeftRoomByDormitory(String dormitoryName);
+    int applyDormitory(String txtAccount,String txtName,String dormitoryName,String room);
 }

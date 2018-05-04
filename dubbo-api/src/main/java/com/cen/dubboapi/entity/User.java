@@ -17,6 +17,15 @@ public class User implements Serializable {
     private Position position;
     private String description;
     private Date birthday;
+    private Date stayintime;
+
+    public Date getStayintime() {
+        return stayintime;
+    }
+
+    public void setStayintime(Date stayintime) {
+        this.stayintime = stayintime;
+    }
 
     public int getId() {
         return id;

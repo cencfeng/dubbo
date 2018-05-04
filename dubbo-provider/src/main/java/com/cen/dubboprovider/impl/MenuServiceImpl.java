@@ -7,7 +7,7 @@ import com.cen.dubboprovider.mapper.MenuMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-@Service
+//@Service
 public class MenuServiceImpl implements MenuService{
     @Autowired
     private MenuMapper menuMapper;

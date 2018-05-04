@@ -3,21 +3,65 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
      <mapper namespace="com.cen.dubboprovider.mapper.DormitoryMapper">
+    <resultMap id="getDormitoryMap" type="Dormitory">
+        <id column="id" property="id"/>
+        <result column="dormitory_name" property="dormitory_name" />
+        <result column="floor" property="floor" />
+        <result column="room" property="room" />
+        <result column="sumbed" property="sumbed" />
+        <result column="leftbed" property="leftbed"/>
+        <result column="dormitory_type" property="dormitory_type" />
+        <association property="dormitorydetail" javaType="DormitoryDetail">
+            <result column="recorddate" property="recorddate"/>
+            <result column="water" property="water"/>
+            <result column="gas" property="gas"/>
+            <result column="electricity" property="electricity"/>
+            <result column="waterrate" property="waterrate"/>
+            <result column="gasrate" property="gasrate"/>
+            <result column="electricityrate" property="electricityrate"/>
+            <result column="total" property="total"/>
+        </association>
+    </resultMap>
           <select id="getDormitoryName" resultType="Dormitory">
              select * from s_dormitory GROUP BY dormitory_name
          </select>
     <select id="getAllRoomByDormitoryName" parameterType="String" resultType="Dormitory">
         SELECT * from s_dormitory where dormitory_name = #{dormitoryName}
     </select>
-    <select id="getDormitoryInfor" parameterType="String" resultMap="com.cen.dubboprovider.mapper.UserMapper.UserinfoMap">
-        select d.account,d.user_name,d.birthday,d.email,d.ic_card,d.sex,d.tel,a.dept_name,b.room,b.sumbed,b.leftbed,b.dormitory_name,b.floor,c.position_name
-from s_dept a,s_dormitory b,s_position c,s_user d
-where a.id = d.dept
-and b.id = d.dormitory
-and c.id = d.position
-and b.dormitory_name = #{dormitoryName}
-<if test="'0'.toString != room.toString()">
-    and b.room = #{room}
-</if>
+    <select id="getDormitoryInfor" parameterType="String" resultMap="getDormitoryMap">
+        select a.dormitory_name,a.room,b.recorddate,a.sumbed,a.leftbed,b.electricity,b.gas,b.water,b.waterrate,b.gasrate,b.electricityrate,b.total
+        from s_dormitory a left JOIN s_dormitory_detail b ON a.id = b.dormitoryid
+        WHERE a.dormitory_name = #{dormitoryName}
+        <if test="'0'.toString() != room.toString()">
+            and room = #{room}
+        </if>
+        <if test="searchDate.toString() != ''.toString()">
+            AND DATE_FORMAT(recorddate,'%Y-%m') = #{searchDate}
+        </if>
     </select>
-     </mapper>
+    <select id="getDormitoryMember" parameterType="String" resultMap="com.cen.dubboprovider.mapper.UserMapper.UserinfoMap">
+         <!--select d.account,d.user_name,d.birthday,d.email,d.ic_card,d.sex,d.tel,d.stayintime,a.dept_name,b.room,b.sumbed,b.leftbed,b.dormitory_name,b.floor,c.position_name
+               from s_dept a,s_dormitory b,s_position c,s_user d
+               where a.id = d.dept
+               and b.id = d.dormitory
+               and c.id = d.position-->
+        select d.account,d.user_name,d.birthday,d.email,d.ic_card,d.sex,d.tel,d.stayintime,a.dept_name,b.room,b.sumbed,b.leftbed,b.dormitory_name,b.floor,c.position_name
+        from ((s_dormitory B LEFT JOIN s_user D ON B.id = D.dormitory)
+        LEFT JOIN s_dept a on d.dept = a.id)LEFT JOIN s_position c on d.position = c.id
+        where b.dormitory_name = #{dormitoryName}
+           <if test="'0'.toString != room.toString()">
+               and b.room = #{room}
+           </if>
+           </select>
+    <select id="getLeftRoomByDormitory" parameterType="String" resultType="Dormitory">
+        select room from s_dormitory where dormitory_name = #{dormitoryName} and leftbed > 0
+    </select>
+    <insert id="applyDormitory" parameterType="String">
+        <selectKey keyProperty="dormitoryid" resultType="int" order="BEFORE">
+            select (select id from s_dormitory where room=#{room}
+            and dormitory_name=#{dormitoryName})dormitoryid from dual
+        </selectKey>
+        update s_dormitory set leftbed=leftbed-1 where dormitory_name=#{dormitoryName} and room=#{room};
+        update s_user set dormitory = ${dormitoryid},stayintime = str_to_date(#{stayintime},'%Y-%m-%d') where account=#{txtAccount}
+    </insert>
+            </mapper>

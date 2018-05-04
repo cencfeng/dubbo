@@ -22,6 +22,7 @@
         $('#usertable').bootstrapTable({
             url: '/user/getuserbyname',
             columns: [
+                {field: 'ck', checkbox: true},
                 {field: 'account', title: '账号'},
                 {field: 'user_name', title: '姓名'},
                 {field: 'sex', title: '性别'},
@@ -31,8 +32,10 @@
                 {field: 'birthday', title: '出生年月'},
                 {field: 'dept.dept_name', title: '部门'},
                 {field: 'dormitory.room', title: '宿舍'},
-                {field: 'position.position_name', title: '职位'}
+                {field: 'position.position_name', title: '职位'},
+                {title:'操作',events: 'actionEvents',formatter:'buttonactionFormatter'}
             ],
+            editable:true,
             showToggle: true,
             showColumns: true,
             showRefresh: true,
@@ -45,6 +48,18 @@
             }
         });
     })
+    function buttonactionFormatter(value, row, index) {
+        return [
+        "<a class='update' href='javascript:;' onclick='updateAction("+index+")' data-toggler='tooltip' title='Edit'><i class='glyphicon glyphicon-edit'></i></a>",
+        "<a class='delete' href='javascript:;' onclick='deleteAction("+index+")' data-toggler='tooltip' title='Remove'><i class='glyphicon glyphicon-remove'></i></a>"
+        ].join('');
+    }
+    function updateAction(index) {
+        var rows = $('#usertable').bootstrapTable('getSelections');
+        var sss=JSON.stringify(rows);
+        alert(rows[0].account);
+    }
+    function deleteAction() {}
 </script>
 </body>
 </html>

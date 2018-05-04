@@ -10,6 +10,7 @@
 <link href="/bootstrap/css/bootstrap-table.css" rel="stylesheet"/>
 <script src="/bootstrap/js/bootstrap-table.min.js"></script>
 <script src="/bootstrap/js/bootstrap-table-zh-CN.js"></script>
+<script src="/bootstrap/js/My97DatePicker/WdatePicker.js"></script>
 <!-- <style type="text/css">
      table td{word-break: keep-all;white-space:nowrap;}
      table th{word-break: keep-all;white-space:nowrap;}
@@ -29,10 +30,12 @@
             var value = $("#dormitoryName").val();
             getallRoom(value);
         });
-        //查询
+        //宿舍费用查询
         $("#btnSearchRoom").click(function(){
             var dormitoryName = $("#dormitoryName").val();
             var room = $("#room").val();
+            var searchDate = $("#searchDate").val();
+            //alert(searchDate);
             //var heights = $(window).height() - 35;
             //var currentPage = 1;
             if(dormitoryName == 0){
@@ -43,13 +46,98 @@
             $("#dormitoryInfo").bootstrapTable('destroy');
             $('#dormitoryInfo').bootstrapTable({
                 columns: [
-                    {field:'account',title:'工号'},
-                    {field:'user_name',title:'姓名'},
-                    {field:'tel',title:'电话'},
-                    {field:'email',title:'邮件'},
-                    {field:'dept.dept_name',title:'部门'},
+                    {title:'序号',formatter:function (value,row,index) {
+                        return index+1;
+                        }},
+                    {field:'dormitory_name',title:'宿舍楼'},
+                    {field:'room',title:'房间'},
+                    {field:'dormitorylist.recorddate', title:'时间', formatter: function (value, row, index) {
+                            if (value == null) {
+                                return "";
+                            }
+                            return value.substr(0,7);
+                            //return value.split(' ',1);
+                        }
+                    },
+                    {field:'dormitorydetail.water',title:'用水量'},
+                    {field:'dormitorydetail.electricity',title:'用电量'},
+                    {field:'dormitorydetail.gas',title:'煤气'},
+                    {field:'dormitorydetail.waterrate',title:'水费'},
+                    {field:'dormitorydetail.electricityrate',title:'电费'},
+                    {field:'dormitorydetail.gasrate',title:'煤气费'},
+                    {field:'dormitorydetail.total',title:'总费用'}
+                ],
+                //height:heights,
+                pagination:true,
+                paginationLoop:true,
+                sortOrder:'asc',
+                smartDisplay:true,
+                showToggle:true,
+                showColumns: true,
+                showRefresh: true,
+                locale:'zh-CN',//中文支持
+                //页面需要展示的列，后端交互对象的属性
+                pagination: true,  //开启分页
+                sidePagination: 'server',
+                pageNumber: 1,//默认加载页
+                pageSize: 10,//每页数据
+                pageList: [5,10,15,20],//可选的每页数据
+                queryParamsType:'',//queryParamsType的默认值为 'limit' ,在默认情况下 传给服务端的参数为：offset,limit,sort
+                //设置为 ''  在这种情况下传给服务器的参数为：pageSize,pageNumber */
+                queryParams: function (params) {
+                    return {
+                        dormitoryName: dormitoryName,
+                        room:room,
+                        searchDate:searchDate,
+                        currentPage:params.pageNumber,
+                        pageSize:params.pageSize
+                    }
+                },//请求服务器数据时的参数
+                url: '/dormitory/getdormitoryinfor', //服务器数据的加载地址
+                responseHandler:function(res){
+                    //在ajax获取到数据，渲染表格之前，修改数据源
+                    var nres = [];
+                    nres.push({total:res.total,rows:res.list});
+                    //var sss = JSON.stringify(res.list[0].dormitorylist[0]);
+                    //alert(res.list[0].dormitorylist[0].water);
+                    return nres[0];
+                }
+            });
+        });
+        //宿舍成员查询
+        $("#btnSearchMember").click(function() {
+            var dormitoryName = $("#dormitoryName").val();
+            var room = $("#room").val();
+            //alert(searchDate);
+            //var heights = $(window).height() - 35;
+            //var currentPage = 1;
+            if (dormitoryName == 0) {
+                alert('请选择信息');
+                $("#dormitoryInfo").bootstrapTable('destroy');
+                return false;
+            }
+            $("#dormitoryInfo").bootstrapTable('destroy');
+            $('#dormitoryInfo').bootstrapTable({
+                columns: [
+                    {title:'序号',formatter:function (value,row,index) {
+                            return index+1;
+                        }},
                     {field:'dormitory.dormitory_name',title:'宿舍楼'},
                     {field:'dormitory.room',title:'房间'},
+                    {field:'user_name',title:'姓名'},
+                    {field:'stayintime', title:'入住时间', formatter: function (value, row, index) {
+                            if (value == null) {
+                                return "";
+                            }
+                            return value.substr(0,7);
+                            //return value.split(' ',1);
+                        }
+                    },
+                    {field:'dormitory.sumbed',title:'床位'},
+                    {field:'dormitory.leftbed',title:'剩余床位'},
+                    {field:'dormitory.sumbed',title:'床位'},
+                    {field:'tel',title:'电话'},
+                    {field:'dept.dept_name',title:'部门'},
                     {field:'position.position_name',title:'职位'},
                 ],
                 //height:heights,
@@ -65,7 +153,7 @@
                 pagination: true,  //开启分页
                 sidePagination: 'server',
                 pageNumber: 1,//默认加载页
-                pageSize: 2,//每页数据
+                pageSize: 10,//每页数据
                 pageList: [5,10,15,20],//可选的每页数据
                 queryParamsType:'',//queryParamsType的默认值为 'limit' ,在默认情况下 传给服务端的参数为：offset,limit,sort
                 //设置为 ''  在这种情况下传给服务器的参数为：pageSize,pageNumber */
@@ -77,11 +165,9 @@
                         pageSize:params.pageSize
                     }
                 },//请求服务器数据时的参数
-                url: '/dormitory/getdormitoryinfor', //服务器数据的加载地址
+                url: '/dormitory/getdormitorymember', //服务器数据的加载地址
                 responseHandler:function(res){
                     //在ajax获取到数据，渲染表格之前，修改数据源
-                   //var sss = JSON.stringify(res);
-                    //alert(sss);
                     var nres = [];
                     nres.push({total:res.total,rows:res.list});
                     return nres[0];
@@ -105,11 +191,23 @@
 </head>
 <body>
 <div class="container">
-    <div class="row">
-        <font color="red">*</font>宿舍楼:<select id="dormitoryName"></select>
-        <font color="red">*</font>房间号:<select id="room"></select>
-        <input type="button" id="btnSearchRoom" class="btn btn-default" value="查询">
-    </div>
+
+        <div class="col-xs-3 col-sm-3" >
+            <font color="red">*</font>宿舍楼:<select id="dormitoryName"></select>
+        </div>
+        <div class="col-xs-3 col-sm-2">
+            房间号:<select id="room"></select>
+        </div>
+        <div class="col-xs-3 col-sm-3">
+            时间:<input type="text" id="searchDate" onclick="WdatePicker({dateFmt: 'yyyy-MM', isShowToday: false});" readonly="readonly">
+        </div>
+        <div class="col-xs-3 col-sm-2">
+            <input type="button" id="btnSearchRoom" class="waves-effect waves-button waves-float" value="费用查询">
+        </div>
+        <div class="col-xs-3 col-sm-2">
+            <input type="button" id="btnSearchMember" class="waves-effect waves-button waves-float" value="成员查询">
+        </div>
+
     <table id="dormitoryInfo"></table>
 </div>
 </body>

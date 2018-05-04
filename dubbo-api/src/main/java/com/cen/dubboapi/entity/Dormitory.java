@@ -2,6 +2,7 @@ package com.cen.dubboapi.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 public class Dormitory implements Serializable {
     private int id;
@@ -11,6 +12,15 @@ public class Dormitory implements Serializable {
     private int sumbed;
     private int leftbed;
     private String dormitorytype;
+    private DormitoryDetail dormitorydetail;
+
+    public DormitoryDetail getDormitorydetail() {
+        return dormitorydetail;
+    }
+
+    public void setDormitorydetail(DormitoryDetail dormitorydetail) {
+        this.dormitorydetail = dormitorydetail;
+    }
 
     public String getDormitorytype() {
         return dormitorytype;

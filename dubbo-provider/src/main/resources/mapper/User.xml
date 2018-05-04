@@ -9,6 +9,7 @@
         <result column="email" property="email" />
         <result column="ic_card" property="ic_card"/>
         <result column="birthday" property="birthday" />
+        <result column="stayintime" property="stayintime"/>
         <!-- 配置映射的关联用户信息 -->
         <!-- association：用于映射关联查询单个对象的信息 property：要将关联查询的用户信息映射到Orders中哪个属性 -->
         <association property="dormitory" javaType="com.cen.dubboapi.entity.Dormitory">
@@ -38,4 +39,12 @@ and d.account = #{account}
     <select id="getUser" parameterType="Login" resultType="Login">
         select * from s_login WHERE account=#{account} and binary password = #{password}
     </select>
+    <select id="getUserByAccount" parameterType="String" resultType="User">
+        SELECT * from s_user WHERE account = #{account}
+    </select>
+    <insert id="insertUser" parameterType="java.util.Map">
+        insert INTO s_user(account,user_name,sex,email, tel,ic_card,location,dept,position,description)
+        values(#{account},#{user_name},#{sex},#{email},#{tel},#{ic_card},#{location},#{dept},#{position},#{description});
+        INSERT INTO s_login(account,password) values(#{account},#{account})
+    </insert>
 </mapper>

@@ -1,5 +1,6 @@
 package com.cen.dubboprovider.provider;
 
+import com.cen.dubboapi.entity.Dormitory;
 import com.cen.dubboapi.entity.User;
 import com.cen.dubboprovider.mapper.DormitoryMapper;
 import org.junit.Test;
@@ -17,9 +18,9 @@ public class ProviderTest {
     private DormitoryMapper dormitoryMapper;
     @Test
     public void getDormitory(){
-        List<User> userList = dormitoryMapper.getDormitoryInfor("A","0");
-        for (User user:userList) {
-            System.out.println(user.getAccount());
+        List<Dormitory> userList = dormitoryMapper.getDormitoryInfor("A","0","");
+        for (Dormitory dormitory:userList) {
+            System.out.println(dormitory.getDormitory_name());
         }
     }
 }
