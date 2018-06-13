@@ -11,9 +11,13 @@
     <dubbo:service interface="com.cen.dubboapi.service.DeptService" ref="deptService"/>
     <dubbo:service interface="com.cen.dubboapi.service.DormitoryService" ref="dormitoryService"/>
     <dubbo:service interface="com.cen.dubboapi.service.MenuService" ref="menuService"/>
+    <dubbo:service interface="com.cen.dubboapi.service.EasyTimeService" ref="easytimeService"/>
+    <dubbo:service interface="com.cen.dubboapi.service.FormService" ref="formService"/>
     <bean id="userService" class="com.cen.dubboprovider.impl.UserServiceImpl"/>
     <bean id="positionService" class="com.cen.dubboprovider.impl.PositionServiceImpl"/>
     <bean id="deptService" class="com.cen.dubboprovider.impl.DeptServiceImpl"/>
     <bean id="dormitoryService" class="com.cen.dubboprovider.impl.DormitoryServiceImpl"/>
     <bean id="menuService" class="com.cen.dubboprovider.impl.MenuServiceImpl"/>
+    <bean id="easytimeService" class="com.cen.dubboprovider.impl.EasyTimeServiceImpl"/>
+    <bean id="formService" class="com.cen.dubboprovider.impl.FormServiceImpl"/>
 </beans>

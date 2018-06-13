@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+     <mapper namespace="com.cen.dubboprovider.mapper.FormMapper">
+          <insert id="insertPrform" parameterType="Costform">
+              insert into s_prform(formcode,dept,supplier,delivery,originator,creatime,signflag,totalprice,attaurl)
+              values('S-PR-MIS19-001',#{dept},#{supplier},#{delivery},#{originator},#{creatime},'0',#{totalprice},#{attaurl})
+          </insert>
+        <insert id="insertPrDetail" parameterType="FormDetail">
+            insert into s_prform_detail(formcode,partno,description,quantity,unitprice,total)
+            values
+            <foreach collection="list" item="formdetail" index="index" separator=",">
+                ('S-PR-MIS18-001',#{formdetail.partno},#{formdetail.description},#{formdetail.quantity},#{formdetail.unitprice},#{formdetail.total})
+            </foreach>
+        </insert>
+        <select id="seletSignOrder" parameterType="String">
+            SELECT * from s_sign_order where formtype = #{formtype} and dept = #{dept}
+        </select>
+        <insert id="insertSign" parameterType="String">
+            INSERT INTO s_sign(formcode,checkname,active)
+        </insert>
+        <select id="getCodeByDept" parameterType="String" resultType="CreateFormCode">
+            select * from s_createformcode where dept = #{dept} and formtype = #{formtype}
+        </select>
+     </mapper>

@@ -47,7 +47,7 @@
                     <img src="/image/avatar.jpg"/>
                 </div>
                 <div class="sp-info">
-                    <span th:text="${session.login.account}"></span>,您好！
+                    <span th:text="${session.user.username}"></span>,您好！
                     <i class="zmdi zmdi-caret-down"></i>
                 </div>
             </a>
@@ -87,7 +87,7 @@
         <div class="content_main">
             <div id="iframe_home" class="iframe cur">
                 <!--首页内容填充-->
-
+                <iframe src="/topage/home" width="100%" height="100%" frameborder="0" scrolling="no"> </iframe>
                 <!--/首页内容填充-->
             </div>
         </div>
