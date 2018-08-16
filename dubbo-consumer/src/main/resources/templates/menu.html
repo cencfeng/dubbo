@@ -11,11 +11,18 @@
     <link href="/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css" rel="stylesheet"/>
     <link href="/bootstrap/css/admin.css" rel="stylesheet"/>
     <script src="/bootstrap/js/jquery-3.2.1.min.js"></script>
+    <link href="/bootstrap/css/bootstrap-table.css" rel="stylesheet"/>
     <style>
         /** skins **/
         #header{background: rgb(41, 161, 118)}
         .content_tab{background: rgb(41, 161, 118)}
         .s-profile>a{background: url("/image/lefttop.png")left top no-repeat}
+        #signli li{
+            text-align: center;
+        }
+        #signPanel{
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -87,7 +94,34 @@
         <div class="content_main">
             <div id="iframe_home" class="iframe cur">
                 <!--首页内容填充-->
-                <iframe src="/topage/home" width="100%" height="100%" frameborder="0" scrolling="no"> </iframe>
+                <!--<div>
+                    <table id="signtable" class="table table-bordered"></table>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-2" style="background-color: #5957F8;box-shadow: 1px 1px 1px #F7F3F8, 1px 1px 1px #F7F3F8;">
+                        序号
+                    </div>
+                </div>
+                -->
+                <div class="panel panel-default" id="signPanel">
+                    <div class="panel-heading" style="text-align: center">
+                        <h3 class="panel-title">待签核信息</h3>
+                    </div>
+                    <div class="panel-body">
+                        <ul class="nav nav-pills nav-stacked" id="signli">
+                            <!--<li class="active">-->
+                                <!--<a href="javascript:Tab.addTab('账号申请','/topage/applyaccount');">-->
+                                        <!--账号申请-->
+                                    <!--<span class="badge pull-right">42</span>-->
+                                <!--</a>-->
+                            <!--</li>-->
+                        </ul>
+                    </div>
+                </div>
+
+                <!--<a class="waves-effect" href="javascript:Tab.addTab('账号申请','/topage/home');">test</a>-->
+                <!--<iframe src="/topage/home" width="100%" height="100%" frameborder="0" scrolling="no"> </iframe>-->
                 <!--/首页内容填充-->
             </div>
         </div>
@@ -103,6 +137,8 @@
 <script src="/fullPage/jquery.jdirk.min.js"></script>
 <script src="/bootstrap/js/admin.js"></script>
 <script src="/bootstrap/js/bootstrap.min.js"></script>
+<script src="/bootstrap/js/bootstrap-table.min.js"></script>
+<script src="/bootstrap/js/bootstrap-table-zh-CN.js"></script>
 <script type="text/javascript">
     function getsubmenu(menuid){
         $.post('/menu/getsubmenu',{mid:menuid},function(data) {
@@ -115,6 +151,7 @@
         });
     }
     $(function () {
+        //获取菜单
         $.post('/menu/getmenu',{},function (data) {
             //var sss = JSON.stringify(data);
             //alert(sss);
@@ -126,6 +163,23 @@
                 varhtml+='<li><div class="upms-version">&copy; FENG V1.0.0</div></li>';
             //alert(varhtml);
             $("#sysmenu").append(varhtml);
+        });
+        //获取签核列表总信息
+        $.post('/costform/getsignsum',{},function (data,status) {
+            if(status == "success"&&data != ""){
+                $("#signPanel").show();
+                //表形式展示
+                var lihtml = '';
+                //var tablehtml ="<thead><tr><td>序号</td><td>单据类型</td><td>操作</td></tr></thead><tbody>"
+                $.each(data, function (i, n) {
+                    //li
+                    lihtml +='<li class="active"><a href=\"javascript:Tab.addTab(\''+n.formtype+'签核\', \'/costform/formsignlist/'+n.formtype+'\');\">'+n.formtype+'<span class=\'badge pull-right\'>'+n.signsum+'</span></a></li>'
+                    //tablehtml += "<tr><td>"+(i+1)+"</td><td>"+n.formtype+"</td><td><li class='active'><a href='/costform/getsignsum' class='active'>签核<span class='badge'>"+n.signsum+"</span></a></li></td></tr>"
+                });
+                //tablehtml += "</tbody>";
+
+                $("#signli").append(lihtml);
+            }
         });
     })
 </script>

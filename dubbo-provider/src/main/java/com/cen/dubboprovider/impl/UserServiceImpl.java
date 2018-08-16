@@ -1,5 +1,6 @@
 package com.cen.dubboprovider.impl;
 
+//import com.alibaba.dubbo.config.annotation.Service;
 import com.cen.dubboapi.entity.Login;
 import com.cen.dubboapi.entity.User;
 import com.cen.dubboapi.service.UserService;

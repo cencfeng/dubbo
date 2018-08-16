@@ -4,9 +4,11 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 public class Costform implements Serializable {
     private int id;
+    private String formtype;
     private String formcode;
     private String dept;
     private String supplier;
@@ -17,7 +19,7 @@ public class Costform implements Serializable {
     private Date creatime;
     private char signflag;
     private float totalprice;
-    private String attaurl;
+    private List<FormDetail> formDetailList;
 
     public int getId() {
         return id;
@@ -25,6 +27,14 @@ public class Costform implements Serializable {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getFormtype() {
+        return formtype;
+    }
+
+    public void setFormtype(String formtype) {
+        this.formtype = formtype;
     }
 
     public String getFormcode() {
@@ -99,11 +109,11 @@ public class Costform implements Serializable {
         this.totalprice = totalprice;
     }
 
-    public String getAttaurl() {
-        return attaurl;
+    public List<FormDetail> getFormDetailList() {
+        return formDetailList;
     }
 
-    public void setAttaurl(String attaurl) {
-        this.attaurl = attaurl;
+    public void setFormDetailList(List<FormDetail> formDetailList) {
+        this.formDetailList = formDetailList;
     }
 }

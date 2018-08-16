@@ -16,9 +16,7 @@
     <script src="/jQueryFileUpload/js/vendor/jquery.ui.widget.js"></script>
     <script src="/jQueryFileUpload/js/jquery.iframe-transport.js"></script>
     <script src="/jQueryFileUpload/js/jquery.fileupload.js"></script>
-    <!--<script src="/bootstrap-fileinput/js/fileinput.min.js"></script>-->
-    <!--<script src="/bootstrap-fileinput/js/locales/zh.js"></script>-->
-    <!--<script src="/bootstrap-fileinput/js/locales/zh-TW.js"></script>-->
+    <script src="/bootstrap/js/jquery.form.min.js"></script>
 <style type="text/css">
     input{
         border:none #FFFFFF;
@@ -39,10 +37,10 @@
 </head>
 <body>
 <div class="panel panel-primary">
-    <!--<div class="panel-heading">-->
-        <!--<h3 class="panel-title">PR单申请</h3>-->
-    <!--</div>-->
-    <div class="panel-body">
+        <!--<div class="panel-heading">-->
+            <!--<h3 class="panel-title">PR单申请</h3>-->
+        <!--</div>-->
+        <div class="panel-body">
         <div class="text-center" style="font-size: 18px">深圳成丰电子有限公司</div>
         <div class="text-center" style="font-family: 华文行楷; font-size: 24px">Synchian Electianice Ea.. Ltd.  No.</div>
         <div class="text-center" style="font-size: 16px; text-decoration-line: underline">PURCHASE REQUISITION SHEET</div>
@@ -53,7 +51,8 @@
                         Supliser:<input type="text" id="supliser" name="supplier">
                     </div>
                     <div class="text-right">
-                        P/O.No.<input type="button" id="createformcode" value="生成" class="btn btn-primary btn-xs" data-toggle="tooltip" title="点击生成pr单号"> :<input type="text" id="formcode" readonly="readonly">
+                        <input type="hidden" name="formtype" value="PR">
+                        P/O.No.<input type="button" id="createformcode" value="生成" class="btn btn-primary btn-xs" data-toggle="tooltip" title="点击生成pr单号"> :<input type="text" id="formcode" name="formcode" readonly="readonly">
                     </div>
                 </div>
                 <div class="row">
@@ -127,16 +126,16 @@
                     </div>
                     <br>
                     <div class="row">
-                        <div class="col-sm-3"><span style="color: red">*</span><label>Originator:</label><input type="text" id="applyuser" th:value="${session.user.username}" name="originator"></div>
-                        <div class="col-sm-3"><label>Certified:</label><input type="text" id="certified" name="certified"></div>
-                        <div class="col-sm-3"><label>Checked:</label><input type="text" id="checked" name="checked"></div>
-                        <div class="col-sm-3"><label>Approved:</label><input type="text" id="approved" name="approved"></div>
+                        <div class="col-sm-3"><span style="color: red">*</span><label>Originator:</label><input type="text" id="applyuser" th:value="${session.user.username}" name="originator" readonly="readonly"></div>
+                        <div class="col-sm-3 visible-print-block"><label>Certified:</label><input type="text" id="certified" name="certified"></div>
+                        <div class="col-sm-3 visible-print-block"><label>Checked:</label><input type="text" id="checked" name="checked"></div>
+                        <div class="col-sm-3 visible-print-block"><label>Approved:</label><input type="text" id="approved" name="approved"></div>
                     </div>
                 </div>
                 <br>
                 <div class="text-center">
-                    <button type="submit" id="btnsubmit" class="btn btn-primary glyphicon glyphicon-ok" onclick="return checksubmit()">提交</button>
-                    <button type="reset" id="reset" class="btn btn-primary glyphicon glyphicon-remove">清空</button>
+                    <button type="button" id="btnsubmit" class="btn btn-primary glyphicon glyphicon-ok" onclick="return checksubmit()">提交</button>
+                    <button type="reset" id="btnreset" name="btnreset" class="btn btn-primary glyphicon glyphicon-remove">清空</button>
                 </div>
             </form>
         </div>
@@ -227,13 +226,16 @@
                 done:function (e, data) {//上传完成执行
                     //var ss = JSON.stringify(data);
                     //alert(data.files[0].name);
-                    if(data.textStatus == "success"){//不严谨
+                    //if(data.textStatus == "success"){//不严谨
+                     if(data.result != 0){
                         var i = $("#attatable tr").length;
                         if(i>0){
                             $("#attatable").show();
                         }
-                        var trid = "attatableindex"+i;
-                        var attahtml = "<tr id='"+trid+"'><td><label>"+data.files[0].name+"</label><input type='hidden' name='fileatta' value='"+data.result+"'></td><td><span class='btn btn-warning btn-xs glyphicon glyphicon-trash' onclick='delAttaTabletr("+trid+")'></span> </td></tr>";
+                         var keyid = data.result;
+                        var trid = "attatableindex"+keyid;
+                        var attahtml = "<tr id='"+trid+"'><td><label>"+data.files[0].name+"</label></td><td><span class='btn btn-warning btn-xs glyphicon glyphicon-trash' onclick='delAttaTabletr("+trid+", "+keyid+")'></span> </td></tr>";
+                        //var attahtml = "<tr id='"+trid+"'><td><label>"+data.files[0].name+"</label><input type='hidden' name='fileatta' value='"+data.result+"'></td><td><span class='btn btn-warning btn-xs glyphicon glyphicon-trash' onclick='delAttaTabletr("+trid+")'></span> </td></tr>";
                         $("#attatable tbody").append(attahtml);
                         //$(".preview").append("<div>"+data.result+"</div>");
                     }
@@ -246,11 +248,15 @@
                 //     alert(ss+"always");
                 // },
                 error:function (e,data) {
-                    alert(data.result);
+                    var ss = JSON.stringify(data);
+                    alert(ss);
                 },
                 fail:function(e, data){
                     alert(data.result);
                 }
+        });
+        $('#myfile').bind('fileuploadsubmit', function (e, data) {
+            data.formData = { formcode: $("#formcode").val() };  //如果需要额外添加参数可以在这里添加
         });
         // $("#myfile").fileinput({
         //     language: 'zh', //设置语言
@@ -287,6 +293,18 @@
                 return false;
             }
         });
+        $("#btnsubmit").click(function () {
+            $("#prform").attr("action", "/costform/prform");
+            $("#prform").ajaxSubmit(function (data) {
+                if(data == "success"){
+                    $("#prform")[0].reset();
+                    $("#attatable tbody").html("");
+                    alert(data);
+                }else {
+                    alert(data);
+                }
+            })
+        })
     })
         // .success(function (result, textStatus, jqXHR) {/* ... */})
         // .error(function (jqXHR, textStatus, errorThrown) {/* ... */})
@@ -299,9 +317,14 @@
     //     $("#attatable tbody").find('tr').eq(index-1).remove();
     // }
     //删除附件
-    function delAttaTabletr(trid) {
+    function delAttaTabletr(trid,keyid) {
         if(confirm("确定删除")){
             $(trid).remove();
+            $.post("/costform/delatta", {keyid:keyid}, function (data,status) {
+                if(status == "success"&&data > 0){
+                    alert("delete success");
+                }
+            })
         }
 
         //$("#uploadtable tbody").find('tr').eq(index).remove();

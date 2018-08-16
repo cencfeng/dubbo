@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-cn" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>首页</title>
+    <script src="/bootstrap/js/jquery-3.2.1.min.js"></script>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <link href="/bootstrap/css/bootstrap-table.css" rel="stylesheet"/>
+    <script src="/bootstrap/js/bootstrap-table.min.js"></script>
+    <script src="/bootstrap/js/bootstrap-table-zh-CN.js"></script>
+
+</head>
+<body>
+<div class="container">
+    <div class="panel panel-default">
+        <input type="hidden" th:value="${formtype}" id="formtype">
+        <table id="prlisttable"></table>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        //var qs = mygetQueryString();
+        //var q1 = qs["formtype"];
+        var formtype = $("#formtype").val();
+        $("#prlisttable").bootstrapTable({
+            columns: [
+                {checkbox:true},
+                {title:'单号', formatter: function (value, row, index) {
+                        var ss = '<a href="/costform/prformsign/signview?formcode='+row.formcode+'">'+row.formcode+'</a>';
+                        return ss;
+                    }},
+                {field:'formtype',title:'单据类型'},
+                {field:'checkname',title:'签核步骤'}
+            ],
+            showToggle:true,
+            showColumns: true,
+            showRefresh: true,
+            pagination:true,
+            paginationLoop:true,
+            sortOrder:'asc',
+            smartDisplay:true,
+            locale:'zh-CN',//中文支持
+            //页面需要展示的列，后端交互对象的属性
+            pagination: true,  //开启分页
+            sidePagination: 'server',
+            pageNumber: 1,//默认加载页
+            pageSize: 10,//每页数据
+            pageList: [5,10,15,20],//可选的每页数据
+            queryParamsType:'',//queryParamsType的默认值为 'limit' ,在默认情况下 传给服务端的参数为：offset,limit,sort
+            //设置为 ''  在这种情况下传给服务器的参数为：pageSize,pageNumber */
+            queryParams: function (params) {
+                return {
+                    currentPage:params.pageNumber,
+                    pageSize:params.pageSize,
+                    formtype:formtype  //q1
+                }
+            },//请求服务器数据时的参数
+            url: '/costform/getprlist', //服务器数据的加载地址
+            responseHandler:function(res) {
+                //在ajax获取到数据，渲染表格之前，修改数据源
+                    var nres = [];
+                    nres.push({total: res.total, rows: res.list});
+                    return nres[0];
+            }
+        });
+    })
+    //js获取url中的参数,在这暂时未使用到
+    /*function mygetQueryString() {
+        var qs = location.search.substr(1), // 获取url中"?"符后的字串
+            args = {}, // 保存参数数据的对象
+            items = qs.length ? qs.split("&") : [], // 取得每一个参数项,
+            item = null,
+            len = items.length;
+
+        for(var i = 0; i < len; i++) {
+            item = items[i].split("=");
+            var name = decodeURIComponent(item[0]),
+                value = decodeURIComponent(item[1]);
+            if(name) {
+                args[name] = value;
+            }
+        }
+        return args;
+    }*/
+</script>
+</body>
+</html>

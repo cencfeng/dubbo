@@ -6,6 +6,10 @@
         http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo
         http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 <!-- 声明需要暴露的服务接口 -->
+    <!--<dubbo:application name="provider"/>-->
+    <!--<dubbo:registry id="localzookeeper" address="zookeeper://127.0.0.1:2181"/>-->
+    <!--<dubbo:registry id="vmzookeeper" address="zookeeper://192.168.214.128:2181" default="false"/>-->
+    <dubbo:protocol name="dubbo" port="20880"/>
     <dubbo:service interface="com.cen.dubboapi.service.UserService" ref="userService"/>
     <dubbo:service interface="com.cen.dubboapi.service.PositionService" ref="positionService"/>
     <dubbo:service interface="com.cen.dubboapi.service.DeptService" ref="deptService"/>

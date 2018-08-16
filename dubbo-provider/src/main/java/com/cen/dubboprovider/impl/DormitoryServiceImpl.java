@@ -60,7 +60,6 @@ public class DormitoryServiceImpl implements DormitoryService {
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         int row = dormitoryMapper.applyDormitory(txtAccount,txtName,dormitoryName,room,sdf.format(date));
-        System.out.println(row);
         return row;
     }
 }

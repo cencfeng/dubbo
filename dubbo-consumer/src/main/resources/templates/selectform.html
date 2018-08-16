@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-cn" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>单据查询</title>
+    <script src="/bootstrap/js/jquery-3.2.1.min.js"></script>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <link href="/bootstrap/css/bootstrap-table.css" rel="stylesheet"/>
+    <script src="/bootstrap/js/bootstrap-table.min.js"></script>
+    <script src="/bootstrap/js/bootstrap-table-zh-CN.js"></script>
+    <script src="/bootstrap/js/My97DatePicker/WdatePicker.js"></script>
+    <script src="/bootstrap/js/jquery.form.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading" style="text-align: center">
+            <h3 class="panel-title">单据查询</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div>
+                    <input type="button" id="test" value="test">
+                    单号:<input type="text" id="formcode" name="formcode"> <input type="button" id="btnselect" class="btn btn-primary btn-sm glyphicon glyphicon-search" value="查询">
+                </div>
+                <!--<form id="selectform">-->
+                    <!--<div class="row">-->
+                        <!--<div class="col-md-2">-->
+                            <!--单号:<input type="text" id="formcode" name="formcode">-->
+                        <!--</div>-->
+                        <!--<div class="col-md-2">-->
+                            <!--单据类型:<input type="text" id="formtype" name="formtype">-->
+                        <!--</div>-->
+                        <!--<div class="col-md-2">-->
+                            <!--发起人:<input type="text" id="account" name="account">-->
+                        <!--</div>-->
+                        <!--<div class="col-md-2">-->
+                            <!--姓名:<input type="text" id="username" name="username">-->
+                        <!--</div>-->
+                        <!--<div class="col-md-2">-->
+                            <!--发起时间:<input type="text" id="creatime" name="creatime" onclick="WdatePicker({dateFmt: 'yyyy-MM-dd', isShowToday: true})">-->
+                        <!--</div>-->
+                        <!--<div class="col-md-2">-->
+                            <!--<input type="button" class="btn btn-primary btn-sm glyphicon glyphicon-search" id="btnsearch" value="查询">-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</form>-->
+            </div>
+        </div>
+        <div><table id="formtable"></table></div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        Inittable();
+        $("#btnselect").click(function () {
+            $("#formtable").bootstrapTable('refresh');
+        });
+        $("#test").click(function () {
+            $("head").append("<script src='http://124.126.15.169:8081/cx/api/cxsj/syscqyinfo/list?callback=showData'><\/script>");
+            // $.post('http://124.126.15.169:8081/cx/api/cxsj/syscqyinfo/list',{'page': 1, 'rows': 100, 'conditionItems': []},function (data) {
+            //     alert(data);
+            // })
+        })
+    })
+    function showData (result) {
+        var data = JSON.stringify(result); //json对象转成字符串
+        alert(data);
+    }
+    function Inittable() {
+        $("#formtable").bootstrapTable({
+            columns: [
+                {title:'单号', formatter: function (value, row, index) {
+                        var ss = '<a href="/costform/prformsign/selectview?formcode='+row.formcode+'">'+row.formcode+'</a>';
+                        return ss;
+                    }},
+                {field:'formtype',title:'单据类型'},
+                {field:'checkname',title:'签核步骤'}
+            ],
+            showToggle:true,
+            showColumns: true,
+            showRefresh: true,
+            pagination:true,
+            paginationLoop:true,
+            sortOrder:'asc',
+            smartDisplay:true,
+            locale:'zh-CN',//中文支持
+            //页面需要展示的列，后端交互对象的属性
+            pagination: true,  //开启分页
+            sidePagination: 'server',
+            pageNumber: 1,//默认加载页
+            pageSize: 10,//每页数据
+            pageList: [5,10,15,20],//可选的每页数据
+            queryParamsType:'',//queryParamsType的默认值为 'limit' ,在默认情况下 传给服务端的参数为：offset,limit,sort
+            //设置为 ''  在这种情况下传给服务器的参数为：pageSize,pageNumber */
+            queryParams: function (params) {
+                var formtype = $("#formtype").val();
+                var account = $("#account").val();
+                var creatime = $("#creatime").val();
+                return {
+                    currentPage:params.pageNumber,
+                    pageSize:params.pageSize,
+                    formcode:$("#formcode").val(),
+                    formtype:formtype,
+                    account:account,
+                    creatime:creatime//q1
+                }
+            },//请求服务器数据时的参数
+            url: '/costform/getformlist', //服务器数据的加载地址
+            responseHandler:function(res) {
+                //在ajax获取到数据，渲染表格之前，修改数据源
+                var nres = [];
+                nres.push({total: res.total, rows: res.list});
+                return nres[0];
+            }
+        });
+    }
+</script>
+</body>
+</html>

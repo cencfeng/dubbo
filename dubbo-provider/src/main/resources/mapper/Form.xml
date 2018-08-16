@@ -3,24 +3,99 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
      <mapper namespace="com.cen.dubboprovider.mapper.FormMapper">
+    <resultMap id="prformmap" type="com.cen.dubboapi.entity.Costform">
+        <result column="formcode" property="formcode"/>
+        <result column="formtype" property="formtype"/>
+        <result column="dept" property="dept"/>
+        <result column="supplier" property="supplier"/>
+        <result column="delivery" property="delivery"/>
+        <result column="originator" property="originator"/>
+        <result column="creatime" property="creatime"/>
+        <result column="signflag" property="signflag"/>
+        <result column="totalprice" property="totalprice"/>
+        <collection property="formDetailList" javaType="ArrayList" ofType="com.cen.dubboapi.entity.FormDetail">
+            <result property="partno" column="partno"/>
+            <result property="description" column="description"/>
+            <result property="quantity" column="quantity"/>
+            <result property="unitprice" column="unitprice"/>
+            <result property="total" column="total"/>
+        </collection>
+    </resultMap>
           <insert id="insertPrform" parameterType="Costform">
-              insert into s_prform(formcode,dept,supplier,delivery,originator,creatime,signflag,totalprice,attaurl)
-              values('S-PR-MIS19-001',#{dept},#{supplier},#{delivery},#{originator},#{creatime},'0',#{totalprice},#{attaurl})
+              insert into s_prform(formcode,formtype,dept,supplier,delivery,originator,creatime,signflag,totalprice)
+              values(#{formcode},#{formtype},#{dept},#{supplier},#{delivery},#{originator},#{creatime},'0',#{totalprice})
           </insert>
         <insert id="insertPrDetail" parameterType="FormDetail">
             insert into s_prform_detail(formcode,partno,description,quantity,unitprice,total)
             values
             <foreach collection="list" item="formdetail" index="index" separator=",">
-                ('S-PR-MIS18-001',#{formdetail.partno},#{formdetail.description},#{formdetail.quantity},#{formdetail.unitprice},#{formdetail.total})
+                (#{formdetail.formcode},#{formdetail.partno},#{formdetail.description},#{formdetail.quantity},#{formdetail.unitprice},#{formdetail.total})
             </foreach>
         </insert>
-        <select id="seletSignOrder" parameterType="String">
-            SELECT * from s_sign_order where formtype = #{formtype} and dept = #{dept}
+        <select id="seletSignOrder" parameterType="Costform" resultType="Signorder">
+            SELECT * from s_sign_order where formtype = #{formtype} and dept = #{dept} and flag = '1'
+            <if test="totalprice lt 5000">
+              and requireflag = '1'
+            </if>
         </select>
-        <insert id="insertSign" parameterType="String">
-            INSERT INTO s_sign(formcode,checkname,active)
+        <insert id="insertSign" parameterType="Sign">
+            insert into s_sign(formtype,formcode,checkname,checktime,signorder,active,account,username)
+            values
+            <foreach collection="list" item="sign" index="index" separator=",">
+                (#{sign.formtype},#{sign.formcode},#{sign.checkname},#{sign.checktime},#{sign.signorder},#{sign.active},#{sign.account},#{sign.username})
+            </foreach>
         </insert>
         <select id="getCodeByDept" parameterType="String" resultType="CreateFormCode">
             select * from s_createformcode where dept = #{dept} and formtype = #{formtype}
         </select>
+        <insert id="insertAtta" parameterType="atta" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+            INSERT INTO s_atta(formcode,attaname, attaurl) values(#{formcode}, #{attaname}, #{attaurl})
+        </insert>
+        <delete id="delAttaBykey" parameterType="long">
+            DELETE FROM s_atta WHERE id=#{keyid}
+        </delete>
+        <update id="updateFormcode" parameterType="String">
+            UPDATE s_createformcode SET codeno=codeno+1 where formtype=#{formtype} and dept=#{dept}
+        </update>
+        <select id="getSignInfor" parameterType="String" resultType="Sign">
+            SELECT id,formtype,formcode,account FROM s_sign where active = '1' and flag = 0 and account = #{account}
+        </select>
+        <select id="getSignByFormcode" parameterType="String" resultType="Sign">
+            SELECT * from s_sign where formcode = #{formcode} and active = '1' and flag = '0'
+        </select>
+        <select id="getSignsum" parameterType="String" resultType="java.util.Map">
+            SELECT count(formtype) AS 'signsum',formtype FROM s_sign where active = '1' and flag = 0 and account = #{account} GROUP BY formtype
+        </select>
+    <select id="getPrList" parameterType="String" resultType="Sign">
+        SELECT id,formtype,formcode,checkname FROM s_sign where active = '1' and flag = 0 and account = #{account} and formtype = #{formtype}
+    </select>
+    <select id="getPrformInfor" parameterType="String" resultMap="prformmap">
+        select * from s_prform a, s_prform_detail b
+        where a.formcode=b.formcode
+        and a.formcode=#{formcode}
+    </select>
+    <select id="getAtta" parameterType="String" resultType="Atta">
+        select * from s_atta where formcode = #{formcode}
+    </select>
+    <update id="signForm" parameterType="String">
+        <selectKey keyProperty="newid" resultType="int" order="BEFORE">
+            SELECT (select  id from s_sign where formcode = #{formcode} and active = '0' and flag= '0' ORDER BY signorder LIMIT 1)as 'newid' from dual
+        </selectKey>
+        UPDATE s_sign set checktime = SYSDATE(), information = #{information}, active = '2' where formcode = #{formcode} and active = '1' and flag = '0';
+        <choose>
+            <when test="newid == null">
+                UPDATE s_prform SET signflag = '2' where formcode = #{formcode}
+            </when>
+            <otherwise>
+                UPDATE s_sign set active = '1' where id=${newid}
+            </otherwise>
+        </choose>
+    </update>
+        <select id="getSignTableList" parameterType="String" resultType="Sign">
+            select * from s_sign where flag = '0'
+            and account = #{account}
+        </select>
+    <select id="getSignTime" parameterType="String" resultType="Sign">
+        select * from s_sign where formcode = #{formcode} and flag = '0' ORDER BY signorder
+    </select>
      </mapper>

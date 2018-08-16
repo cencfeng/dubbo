@@ -11,11 +11,11 @@
         <module name="dubbo-provider" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
+    <bytecodeTargetLevel target="1.8">
       <module name="dubbo-api" target="1.8" />
       <module name="dubbo-consumer" target="1.8" />
       <module name="dubbo-provider" target="1.8" />
-      <module name="springdubbo" target="1.5" />
+      <module name="springdubbo" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
